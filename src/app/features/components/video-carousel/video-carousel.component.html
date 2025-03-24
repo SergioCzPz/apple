@@ -1,0 +1,42 @@
+<div class="flex items-center">
+  @for (highlight of highlightStates; track $index) {
+    <div id="slider" class="sm:pr-20 pr-10">
+      <div class="video-carousel_container">
+        <div
+          class="w-full h-full flex-center rounded-3xl overflow-hidden bg-black">
+          <video
+            appHighlightSlide
+            (play)="onPlay($event)"
+            (ended)="onEnd($event)"
+            [id]="'video-' + highlight.id"
+            [playsInline]="true"
+            preload="auto"
+            muted>
+            <source [src]="highlight.video" type="video/mp4" />
+          </video>
+        </div>
+
+        <div class="absolute top-12 left-[5%] z-10">
+          @for (text of highlight.textLists; track $index) {
+            <p class="md:text-2xl text-xl font-medium">{{ text }}</p>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>
+
+<div class="relative flex-center mt-10">
+  <div class="flex-center py-5 px-7 bg-gray-300 backdrop-blur rounded-full">
+    @for (highlight of highlightStates; track $index) {
+      <span
+        class="mx-2 w-3 h-3 bg-gray-200 rounded-full relative cursor-pointer">
+        <span class="absolute h-full w-full rounded-full"></span>
+      </span>
+    }
+  </div>
+
+  <button class="control-btn">
+    <img src="assets/images/pause.svg" alt="pause" />
+  </button>
+</div>

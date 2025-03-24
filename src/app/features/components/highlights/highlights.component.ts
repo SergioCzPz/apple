@@ -8,10 +8,11 @@ import {
 } from '@angular/core';
 
 import gsap from 'gsap';
+import { VideoCarouselComponent } from '../video-carousel/video-carousel.component';
 
 @Component({
   selector: 'app-highlights',
-  imports: [],
+  imports: [VideoCarouselComponent],
   templateUrl: './highlights.component.html',
   styles: `
     :host {

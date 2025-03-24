@@ -1,4 +1,4 @@
-export interface Slide {
+export interface Highlight {
   id: number;
   textLists: string[];
   video: string;

@@ -1,8 +1,8 @@
-import { Model, Size, Slide } from '../types/constants.type';
+import { Highlight, Model, Size } from '../types/constants.type';
 
 export const navLists: string[] = ['Store', 'Mac', 'iPhone', 'Support'];
 
-export const hightlightsSlides: Slide[] = [
+export const highlights: Highlight[] = [
   {
     id: 1,
     textLists: [
