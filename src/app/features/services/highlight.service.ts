@@ -11,9 +11,13 @@ import {
 export class HighlightService {
   public highlightStates: HightlightState[];
   public htmlVideos: ElementRef<HTMLVideoElement>[];
+  public htmlVideoSpanRefs: ElementRef<HTMLSpanElement>[];
+  public htmlVideoDivRefs: ElementRef<HTMLSpanElement>[];
 
   constructor() {
     this.highlightStates = highlightAdapt(highlights);
     this.htmlVideos = [];
+    this.htmlVideoSpanRefs = [];
+    this.htmlVideoDivRefs = [];
   }
 }

@@ -10,14 +10,21 @@ import { HightlightState } from 'src/app/shared/adapters/highlight.adapter';
 import { isPlatformBrowser } from '@angular/common';
 import { HighlightSlideDirective } from '../../directives/highlight-slide.directive';
 import { HighlightService } from '../../services/highlight.service';
+import { VideoDivRefDirective } from '../../directives/video-div-ref.directive';
+import { VideoSpanRefDirective } from '../../directives/video-span-ref.directive';
 
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/all';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
 gsap.registerPlugin(ScrollTrigger);
 
 @Component({
   selector: 'app-video-carousel',
-  imports: [HighlightSlideDirective],
+  imports: [
+    HighlightSlideDirective,
+    VideoDivRefDirective,
+    VideoSpanRefDirective,
+  ],
   templateUrl: './video-carousel.component.html',
   styles: `
     :host {
@@ -33,10 +40,14 @@ export class VideoCarouselComponent implements AfterViewInit {
   public highlightStates: HightlightState[];
   public activeHighlight!: HightlightState | undefined;
   public htmlVideos: ElementRef<HTMLVideoElement>[];
+  public htmlVideoSpanRefs: ElementRef<HTMLSpanElement>[];
+  public htmlVideoDivRefs: ElementRef<HTMLSpanElement>[];
 
   constructor() {
     this.highlightStates = this.highlightService.highlightStates;
     this.htmlVideos = this.highlightService.htmlVideos;
+    this.htmlVideoSpanRefs = this.highlightService.htmlVideoSpanRefs;
+    this.htmlVideoDivRefs = this.highlightService.htmlVideoDivRefs;
     this.setActiveHighlight();
   }
 
@@ -65,11 +76,78 @@ export class VideoCarouselComponent implements AfterViewInit {
         videoEl.nativeElement.id === `video-${this.activeHighlight?.id}`
     );
     htmlvideo?.nativeElement.play();
+
+    // this.animateSpan();
   }
 
   onPlay(event: Event): void {
     console.log('onPlay ', event);
     this.activeHighlight!.isPlaying = true;
+
+    const spanId = `#${
+      this.htmlVideoSpanRefs.find(
+        span =>
+          span.nativeElement.id === `videoSpanRef-${this.activeHighlight?.id}`
+      )?.nativeElement.id
+    }`;
+
+    const videoDivRefId = `#${
+      this.htmlVideoDivRefs.find(
+        div =>
+          div.nativeElement.id === `videoDivRef-${this.activeHighlight?.id}`
+      )?.nativeElement.id
+    }`;
+
+    const htmlVideo = this.htmlVideos.find(
+      video => video.nativeElement.id === `video-${this.activeHighlight?.id}`
+    )?.nativeElement;
+
+    let currentProgress = 0;
+
+    const anim = gsap.to(videoDivRefId, {
+      onUpdate: () => {
+        const progress = Math.ceil(anim.progress() * 100);
+
+        if (progress != currentProgress) {
+          currentProgress = progress;
+
+          gsap.to(videoDivRefId, {
+            width:
+              window.innerWidth < 760
+                ? '10vw' // mobile
+                : window.innerWidth < 1200
+                  ? '10vw' // tablet
+                  : '4vw', // laptop
+          });
+
+          gsap.to(spanId, {
+            width: `${currentProgress}%`,
+            backgroundColor: 'white',
+          });
+        }
+      },
+
+      onComplete: () => {
+        if (this.activeHighlight?.isPlaying) {
+          gsap.to(videoDivRefId, {
+            width: '12px',
+          });
+          gsap.to(spanId, {
+            backgroundColor: '#afafaf',
+          });
+        }
+      },
+    });
+
+    const animUpdate = () => {
+      anim.progress(htmlVideo!.currentTime / htmlVideo!.duration);
+    };
+
+    if (this.activeHighlight?.isPlaying) {
+      gsap.ticker.add(animUpdate);
+    } else {
+      gsap.ticker.remove(animUpdate);
+    }
   }
 
   onEnd(event: Event): void {
@@ -116,4 +194,6 @@ export class VideoCarouselComponent implements AfterViewInit {
 
     activeHighlight!.startPlay = true;
   }
+
+  // animateSpan(): void {}
 }
