@@ -142,22 +142,27 @@ export class VideoCarouselComponent implements AfterViewInit {
           ? '10vw' // tablet
           : '4vw'; // laptop
 
-    // gsap.to(`#${this.activeVideoDivRef()?.nativeElement.id}`, {
-    //   width: widthDivRef,
-    //   onComplete: () => {
-    //     gsap.to(`#${this.activeVideoSpanRef()?.nativeElement.id}`, {
-    //       backgroundColor: 'white',
-    //     });
-    //   },
-    // });
-
     gsap.to(`#${this.activeVideoDivRef()?.nativeElement.id}`, {
       width: widthDivRef,
     });
 
     gsap.to(`#${this.activeVideoSpanRef()?.nativeElement.id}`, {
-      width: '6.5%',
       backgroundColor: 'white',
+      width: '6.5%',
+    });
+  }
+
+  resetSpans(): void {
+    const spanId = `#${this.activeVideoSpanRef()?.nativeElement.id}`;
+    const videoDivRefId = `#${this.activeVideoDivRef()?.nativeElement.id}`;
+
+    gsap.to(videoDivRefId, {
+      width: '12px',
+    });
+
+    gsap.to(spanId, {
+      backgroundColor: '#afafaf',
+      width: '12px',
     });
   }
 
@@ -169,28 +174,17 @@ export class VideoCarouselComponent implements AfterViewInit {
 
   onEnd(): void {
     this.stateOnEnd();
-
-    const spanId = `#${this.activeVideoSpanRef()?.nativeElement.id}`;
-    const videoDivRefId = `#${this.activeVideoDivRef()?.nativeElement.id}`;
-
-    gsap.to(videoDivRefId, {
-      width: '12px',
-    });
-
-    gsap.to(spanId, {
-      backgroundColor: '#afafaf',
-    });
+    this.resetSpans();
 
     const nextId = this.activeVideo.id() + 1;
     if (nextId > this.highlights.length) return;
 
-    this.moveSlide();
+    this.moveSlide(nextId - 1);
     this.activeVideo.id.set(nextId);
   }
 
   onPause(): void {
     this.activeVideo.isPlaying.set(false);
-    this.activeVideo.wasPaused = true;
   }
 
   onTimeUpdate(): void {
@@ -210,11 +204,11 @@ export class VideoCarouselComponent implements AfterViewInit {
     this.activeVideoHtml()?.nativeElement.play();
   }
 
-  moveSlide(): void {
+  moveSlide(slide: number): void {
     if (this.activeVideo.isLastVideo) return;
 
     gsap.to(`#slider`, {
-      transform: `translateX(${-100 * this.activeVideo.id()}%)`,
+      transform: `translateX(${-100 * slide}%)`,
       duration: 2,
       ease: 'power2.inOut',
       onComplete: () => {
@@ -235,44 +229,32 @@ export class VideoCarouselComponent implements AfterViewInit {
   }
 
   changeSlide(spanId: number): void {
-    if (this.activeVideo.isPlaying()) {
-      this.activeVideoHtml()?.nativeElement.pause();
-      this.activeVideoHtml()!.nativeElement.currentTime = 0;
-    }
-
-    const pastId = this.activeVideo.isLastVideo
-      ? this.activeVideo.id() - 1
-      : this.activeVideo.id();
-
-    const videoDivRefId = `#videoDivRef-${pastId}`;
-    const spanHtmlId = `#videoSpanRef-${spanId}`;
-
-    gsap.to(videoDivRefId, {
-      width: '12px',
-    });
-    gsap.to(spanHtmlId, {
-      backgroundColor: '#afafaf',
-      width: '0px',
-    });
+    if (spanId === this.activeVideo.id()) return;
+    this.activeVideoHtml()!.nativeElement.pause();
+    this.activeVideoHtml()!.nativeElement.currentTime = 0;
+    this.stateOnEnd();
+    this.resetSpans();
 
     this.activeVideo.id.set(spanId);
 
     if (spanId === 1) {
       this.initSlide();
     } else {
-      this.moveSlide();
+      this.activeVideo.isLastVideo = false;
+      this.moveSlide(spanId - 1);
     }
   }
 
-  // btn
   changeVideoState(): void {
     if (this.activeVideo.isPlaying()) {
       this.activeVideoHtml()?.nativeElement.pause();
+      this.activeVideo.wasPaused = true;
       return;
     }
 
     if (this.activeVideo.isEnd() && this.activeVideo.isLastVideo) {
       this.activeVideo.id.set(1);
+      this.activeVideo.wasPaused = false;
       this.initSlide();
       return;
     }
