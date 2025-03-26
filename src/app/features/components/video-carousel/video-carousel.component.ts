@@ -2,19 +2,24 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  computed,
   ElementRef,
   inject,
   PLATFORM_ID,
+  Signal,
+  signal,
 } from '@angular/core';
-import { HightlightState } from 'src/app/shared/adapters/highlight.adapter';
-import { isPlatformBrowser } from '@angular/common';
+import { highlights } from '@constants/constants';
+import { Highlight } from 'src/app/shared/types/constants.type';
 import { HighlightSlideDirective } from '../../directives/highlight-slide.directive';
-import { HighlightService } from '../../services/highlight.service';
 import { VideoDivRefDirective } from '../../directives/video-div-ref.directive';
 import { VideoSpanRefDirective } from '../../directives/video-span-ref.directive';
 
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ScrollTrigger } from 'gsap/all';
+import { HighlightService } from '../../services/highlight.service';
+import { isPlatformBrowser } from '@angular/common';
+import { ActiveVideo } from 'src/app/shared/types/video.active.type';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -37,163 +42,241 @@ export class VideoCarouselComponent implements AfterViewInit {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly highlightService = inject(HighlightService);
 
-  public highlightStates: HightlightState[];
-  public activeHighlight!: HightlightState | undefined;
+  public highlights: Highlight[];
+  public activeVideo: ActiveVideo;
+  public activeVideoDivRef: Signal<ElementRef<HTMLSpanElement> | undefined>;
+  public activeVideoSpanRef: Signal<ElementRef<HTMLSpanElement> | undefined>;
+  public activeVideoHtml: Signal<ElementRef<HTMLVideoElement> | undefined>;
+  public btnImgSrc: Signal<string>;
+  public altBtnImg: Signal<string>;
+
   public htmlVideos: ElementRef<HTMLVideoElement>[];
   public htmlVideoSpanRefs: ElementRef<HTMLSpanElement>[];
   public htmlVideoDivRefs: ElementRef<HTMLSpanElement>[];
 
   constructor() {
-    this.highlightStates = this.highlightService.highlightStates;
+    this.highlights = highlights;
     this.htmlVideos = this.highlightService.htmlVideos;
     this.htmlVideoSpanRefs = this.highlightService.htmlVideoSpanRefs;
     this.htmlVideoDivRefs = this.highlightService.htmlVideoDivRefs;
-    this.setActiveHighlight();
-  }
-
-  ngAfterViewInit(): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-    ScrollTrigger.create({
-      trigger: '#slider',
-      start: 'top center', // Ajusta según necesites
-      end: 'bottom center', // Ajusta según necesites
-      onEnter: () => {
-        this.startPlay();
-        console.log('Video play');
-      },
-    });
-  }
-
-  setActiveHighlight(): void {
-    this.activeHighlight = this.highlightStates.find(
-      highlight => highlight.startPlay === true
-    );
-  }
-
-  startPlay(): void {
-    const htmlvideo = this.htmlVideos.find(
-      videoEl =>
-        videoEl.nativeElement.id === `video-${this.activeHighlight?.id}`
-    );
-    htmlvideo?.nativeElement.play();
-
-    // this.animateSpan();
-  }
-
-  onPlay(event: Event): void {
-    console.log('onPlay ', event);
-    this.activeHighlight!.isPlaying = true;
-
-    const spanId = `#${
-      this.htmlVideoSpanRefs.find(
-        span =>
-          span.nativeElement.id === `videoSpanRef-${this.activeHighlight?.id}`
-      )?.nativeElement.id
-    }`;
-
-    const videoDivRefId = `#${
-      this.htmlVideoDivRefs.find(
-        div =>
-          div.nativeElement.id === `videoDivRef-${this.activeHighlight?.id}`
-      )?.nativeElement.id
-    }`;
-
-    const htmlVideo = this.htmlVideos.find(
-      video => video.nativeElement.id === `video-${this.activeHighlight?.id}`
-    )?.nativeElement;
-
-    let currentProgress = 0;
-
-    const anim = gsap.to(videoDivRefId, {
-      onUpdate: () => {
-        const progress = Math.ceil(anim.progress() * 100);
-
-        if (progress != currentProgress) {
-          currentProgress = progress;
-
-          gsap.to(videoDivRefId, {
-            width:
-              window.innerWidth < 760
-                ? '10vw' // mobile
-                : window.innerWidth < 1200
-                  ? '10vw' // tablet
-                  : '4vw', // laptop
-          });
-
-          gsap.to(spanId, {
-            width: `${currentProgress}%`,
-            backgroundColor: 'white',
-          });
-        }
-      },
-
-      onComplete: () => {
-        if (this.activeHighlight?.isPlaying) {
-          gsap.to(videoDivRefId, {
-            width: '12px',
-          });
-          gsap.to(spanId, {
-            backgroundColor: '#afafaf',
-          });
-        }
-      },
-    });
-
-    const animUpdate = () => {
-      anim.progress(htmlVideo!.currentTime / htmlVideo!.duration);
+    this.activeVideo = {
+      id: signal(1),
+      isEnd: signal(false),
+      isLastVideo: false,
+      isPlaying: signal(false),
+      wasPaused: false,
     };
 
-    if (this.activeHighlight?.isPlaying) {
-      gsap.ticker.add(animUpdate);
-    } else {
-      gsap.ticker.remove(animUpdate);
-    }
+    this.btnImgSrc = computed(() => {
+      if (this.activeVideo.isLastVideo && this.activeVideo.isEnd()) {
+        return 'assets/images/replay.svg';
+      }
+
+      if (this.activeVideo.isPlaying() === false) {
+        return 'assets/images/play.svg';
+      }
+
+      return 'assets/images/pause.svg';
+    });
+
+    this.altBtnImg = computed(() => {
+      if (this.activeVideo.isLastVideo && this.activeVideo.isEnd()) {
+        return 'replay';
+      }
+
+      if (this.activeVideo.isPlaying() === false) {
+        return 'play';
+      }
+
+      return 'pause';
+    });
+
+    this.activeVideoDivRef = computed(() => {
+      return this.htmlVideoDivRefs.find(
+        span => span.nativeElement.id === `videoDivRef-${this.activeVideo.id()}`
+      );
+    });
+
+    this.activeVideoSpanRef = computed(() => {
+      return this.htmlVideoSpanRefs.find(
+        span =>
+          span.nativeElement.id === `videoSpanRef-${this.activeVideo.id()}`
+      );
+    });
+
+    this.activeVideoHtml = computed(() => {
+      return this.htmlVideos.find(
+        video => video.nativeElement.id === `video-${this.activeVideo.id()}`
+      );
+    });
+  }
+  ngAfterViewInit(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    ScrollTrigger.create({
+      trigger: '#slider',
+      start: 'top center',
+      end: 'bottom center',
+      onEnter: () => {
+        this.startCarousel();
+      },
+    });
   }
 
-  onEnd(event: Event): void {
-    console.log('onEnd ', event);
+  stateOnPlay(): void {
+    this.activeVideo.isEnd.set(false);
+    this.activeVideo.isPlaying.set(true);
+    this.activeVideo.isLastVideo =
+      this.activeVideo.id() === this.htmlVideos.length;
+  }
+
+  onPlay(): void {
+    this.stateOnPlay();
+
+    if (this.activeVideo.wasPaused) return;
+
+    const widthDivRef =
+      window.innerWidth < 760
+        ? '10vw' // mobile
+        : window.innerWidth < 1200
+          ? '10vw' // tablet
+          : '4vw'; // laptop
+
+    // gsap.to(`#${this.activeVideoDivRef()?.nativeElement.id}`, {
+    //   width: widthDivRef,
+    //   onComplete: () => {
+    //     gsap.to(`#${this.activeVideoSpanRef()?.nativeElement.id}`, {
+    //       backgroundColor: 'white',
+    //     });
+    //   },
+    // });
+
+    gsap.to(`#${this.activeVideoDivRef()?.nativeElement.id}`, {
+      width: widthDivRef,
+    });
+
+    gsap.to(`#${this.activeVideoSpanRef()?.nativeElement.id}`, {
+      width: '6.5%',
+      backgroundColor: 'white',
+    });
+  }
+
+  stateOnEnd(): void {
+    this.activeVideo.isEnd.set(true);
+    this.activeVideo.wasPaused = false;
+    this.activeVideo.isPlaying.set(false);
+  }
+
+  onEnd(): void {
+    this.stateOnEnd();
+
+    const spanId = `#${this.activeVideoSpanRef()?.nativeElement.id}`;
+    const videoDivRefId = `#${this.activeVideoDivRef()?.nativeElement.id}`;
+
+    gsap.to(videoDivRefId, {
+      width: '12px',
+    });
+
+    gsap.to(spanId, {
+      backgroundColor: '#afafaf',
+    });
+
+    const nextId = this.activeVideo.id() + 1;
+    if (nextId > this.highlights.length) return;
+
     this.moveSlide();
+    this.activeVideo.id.set(nextId);
+  }
+
+  onPause(): void {
+    this.activeVideo.isPlaying.set(false);
+    this.activeVideo.wasPaused = true;
+  }
+
+  onTimeUpdate(): void {
+    const spanId = `#${this.activeVideoSpanRef()?.nativeElement.id}`;
+    const htmlVideo = this.activeVideoHtml()?.nativeElement;
+
+    gsap.to(spanId, {
+      width: `${(htmlVideo!.currentTime / htmlVideo!.duration) * 100}%`,
+    });
+  }
+
+  startCarousel(): void {
+    this.playVideo();
+  }
+
+  playVideo(): void {
+    this.activeVideoHtml()?.nativeElement.play();
   }
 
   moveSlide(): void {
-    if (this.activeHighlight?.isLastVideo) return;
+    if (this.activeVideo.isLastVideo) return;
 
     gsap.to(`#slider`, {
-      transform: `translateX(${-100 * this.activeHighlight!.id}%)`,
+      transform: `translateX(${-100 * this.activeVideo.id()}%)`,
       duration: 2,
       ease: 'power2.inOut',
       onComplete: () => {
-        this.switchHighlightState();
-        this.startPlay();
+        this.playVideo();
       },
     });
   }
 
-  switchHighlightState(): void {
-    this.desactiveHighligth();
-    this.activateHighlight();
-    this.setActiveHighlight();
+  initSlide(): void {
+    gsap.to(`#slider`, {
+      transform: `translateX(0px)`,
+      duration: 2,
+      ease: 'power2.inOut',
+      onComplete: () => {
+        this.playVideo();
+      },
+    });
   }
 
-  // set startPlay to false to the past video
-  desactiveHighligth(): void {
-    const desactiveHighlight = this.highlightStates.find(
-      highlight => highlight.id === this.activeHighlight!.id
-    );
+  changeSlide(spanId: number): void {
+    if (this.activeVideo.isPlaying()) {
+      this.activeVideoHtml()?.nativeElement.pause();
+      this.activeVideoHtml()!.nativeElement.currentTime = 0;
+    }
 
-    desactiveHighlight!.isEnd = true;
-    desactiveHighlight!.startPlay = false;
-    desactiveHighlight!.isPlaying = false;
+    const pastId = this.activeVideo.isLastVideo
+      ? this.activeVideo.id() - 1
+      : this.activeVideo.id();
+
+    const videoDivRefId = `#videoDivRef-${pastId}`;
+    const spanHtmlId = `#videoSpanRef-${spanId}`;
+
+    gsap.to(videoDivRefId, {
+      width: '12px',
+    });
+    gsap.to(spanHtmlId, {
+      backgroundColor: '#afafaf',
+      width: '0px',
+    });
+
+    this.activeVideo.id.set(spanId);
+
+    if (spanId === 1) {
+      this.initSlide();
+    } else {
+      this.moveSlide();
+    }
   }
 
-  // set startPlay to true to the next video
-  activateHighlight(): void {
-    const activeHighlight = this.highlightStates.find(
-      highlight => highlight.id === this.activeHighlight!.id + 1
-    );
+  // btn
+  changeVideoState(): void {
+    if (this.activeVideo.isPlaying()) {
+      this.activeVideoHtml()?.nativeElement.pause();
+      return;
+    }
 
-    activeHighlight!.startPlay = true;
+    if (this.activeVideo.isEnd() && this.activeVideo.isLastVideo) {
+      this.activeVideo.id.set(1);
+      this.initSlide();
+      return;
+    }
+
+    this.activeVideoHtml()?.nativeElement.play();
   }
-
-  // animateSpan(): void {}
 }
