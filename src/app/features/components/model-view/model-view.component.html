@@ -5,9 +5,31 @@
   [angle]="0.15"
   [penumbra]="1"
   [decay]="0" />
-<ngt-point-light [position]="-10" [intensity]="0.5 * Math.PI" [decay]="0" />
 
-<app-iphone />
+<ngt-group>
+  <ngt-point-light
+    [position]="[-2, 10, 5]"
+    [angle]="0.15"
+    [penumbra]="1"
+    [intensity]="0.2 * Math.PI"
+    [decay]="0" />
+  <ngt-point-light
+    [position]="[0, -25, 10]"
+    [angle]="0.15"
+    [penumbra]="1"
+    [intensity]="0.2 * Math.PI"
+    [decay]="0" />
+  <ngt-point-light
+    [position]="[0, 15, 5]"
+    [angle]="0.15"
+    [penumbra]="1"
+    [intensity]="3 * Math.PI"
+    [decay]="0.1" />
+</ngt-group>
 
-<ngt-orbit-controls *args="[camera(), glDomElement()]" />
+<div class="bg-blue">
+  <app-iphone />
+</div>
+
+<ngt-orbit-controls *args="[camera(), glDomElement()]" [enableZoom]="false" />
 <ngt-grid-helper />

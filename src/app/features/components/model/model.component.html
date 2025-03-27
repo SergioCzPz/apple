@@ -6,6 +6,37 @@
       <div class="w-full h-[75vh] md:h-[90vh] overflow-hidden relative">
         <ngt-canvas [sceneGraph]="modelView" />
       </div>
+
+      <div class="mx-auto w-full">
+        <p class="text-sm font-light text-center mb-5">{{ model.title }}</p>
+        <div class="flex-center">
+          <ul class="color-container">
+            <li
+              class="w-6 h-6 rounded-full mx-2"
+              [style.background]="model.color[1]"></li>
+          </ul>
+
+          <button class="size-btn-container" (click)="changeSize()">
+            @for (size of sizes; track $index) {
+              <span
+                class="size-btn"
+                [style]="
+                  size.value === activeSize()
+                    ? {
+                        background: 'white',
+                        color: 'black',
+                      }
+                    : {
+                        background: 'transparent',
+                        color: 'white',
+                      }
+                ">
+                {{ size.label }}</span
+              >
+            }
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </section>
