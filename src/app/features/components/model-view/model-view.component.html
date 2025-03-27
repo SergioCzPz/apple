@@ -1,1 +1,13 @@
-<p>model-view works!</p>,
+<ngt-ambient-light [intensity]="0.5" />
+<ngt-spot-light
+  [position]="10"
+  [intensity]="0.5 * Math.PI"
+  [angle]="0.15"
+  [penumbra]="1"
+  [decay]="0" />
+<ngt-point-light [position]="-10" [intensity]="0.5 * Math.PI" [decay]="0" />
+
+<app-iphone />
+
+<ngt-orbit-controls *args="[camera(), glDomElement()]" />
+<ngt-grid-helper />
