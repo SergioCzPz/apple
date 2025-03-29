@@ -27,9 +27,11 @@
     [decay]="0.1" />
 </ngt-group>
 
-<div class="bg-blue">
-  <app-iphone />
-</div>
+<app-iphone />
 
-<ngt-orbit-controls *args="[camera(), glDomElement()]" [enableZoom]="false" />
-<ngt-grid-helper />
+<ngt-orbit-controls
+  [minPolarAngle]="Math.PI / 2"
+  [maxPolarAngle]="Math.PI / 2"
+  *args="[camera(), glDomElement()]"
+  [enableZoom]="false" />
+<!-- <ngt-grid-helper /> -->

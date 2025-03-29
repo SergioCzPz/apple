@@ -16,6 +16,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/all';
 import { Model } from 'src/app/shared/types/constants.type';
 import { sizes } from '@constants/constants';
+import { ThreeModelService } from '../../services/three-model.service';
 
 extend(THREE);
 
@@ -35,6 +36,7 @@ gsap.registerPlugin(ScrollTrigger);
 export class ModelComponent implements AfterViewInit {
   private readonly platformId = inject(PLATFORM_ID);
   protected modelView = ModelViewComponent;
+  private readonly threeModelService = inject(ThreeModelService);
 
   public sizes = sizes;
   public model: Model = {
@@ -44,6 +46,10 @@ export class ModelComponent implements AfterViewInit {
     img: 'assets/images/black.jpg',
   };
   public activeSize = signal<string>('small');
+
+  constructor() {
+    this.threeModelService.size = this.activeSize;
+  }
 
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
