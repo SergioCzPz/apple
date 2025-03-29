@@ -1,0 +1,26 @@
+<footer class="py-5 sm:px-10 px-5">
+  <div class="screen-max-width">
+    <div>
+      <p class="font-semibold text-gray text-xs">
+        More ways to shop:
+        <span class="underline text-blue"> Find an Apple Store </span>or
+        <span class="underline text-blue">other retailer</span> near you.
+      </p>
+
+      <p class="font-semibold text-gray text-xs">Or call 000800-040-1966</p>
+    </div>
+
+    <div class="bg-neutral-700 my-5 h-[1px] w-full"></div>
+
+    <div class="flex md:flex-row flex-col md:items-start justify-between">
+      <p class="font-semibold text-gray text-xs">
+        Copyright 2024 Apple Inc. All rights reserved.
+      </p>
+      <div class="flex gap-3">
+        @for (link of footerLinks; track $index) {
+          <p class="font-semibold text-gray text-xs">{{ link }}</p>
+        }
+      </div>
+    </div>
+  </div>
+</footer>
