@@ -4,6 +4,7 @@ import { HighlightsComponent } from '@features/components/highlights/highlights.
 import { NavbarComponent } from '@features/components/navbar/navbar.component';
 import { ModelComponent } from '../../components/model/model.component';
 import { FeaturesComponent } from '../../components/features/features.component';
+import { HowItWorksComponent } from '../../components/how-it-works/how-it-works.component';
 
 @Component({
   selector: 'app-home',
@@ -13,6 +14,7 @@ import { FeaturesComponent } from '../../components/features/features.component'
     HighlightsComponent,
     ModelComponent,
     FeaturesComponent,
+    HowItWorksComponent,
   ],
   templateUrl: './home.component.html',
   styles: `
