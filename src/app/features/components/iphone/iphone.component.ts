@@ -50,7 +50,7 @@ export class IphoneComponent {
           const tl = gsap.timeline({
             scrollTrigger: {
               trigger: '#scene',
-              start: 'top top',
+              start: '-15% top',
               end: 'bottom center',
             },
             onStart: () => {

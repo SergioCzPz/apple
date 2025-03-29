@@ -12,15 +12,12 @@ import { ModelViewComponent } from '../model-view/model-view.component';
 import { NgtCanvas, extend } from 'angular-three';
 import * as THREE from 'three';
 
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/all';
 import { Model } from 'src/app/shared/types/constants.type';
 import { sizes } from '@constants/constants';
 import { ThreeModelService } from '../../services/three-model.service';
+import { animateWithGsap } from 'src/app/shared/utils/animations';
 
 extend(THREE);
-
-gsap.registerPlugin(ScrollTrigger);
 
 @Component({
   selector: 'app-model',
@@ -54,7 +51,7 @@ export class ModelComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
 
-    gsap.to('#heading', {
+    animateWithGsap('#heading', {
       y: 0,
       opacity: 1,
     });
