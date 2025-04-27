@@ -1,59 +1,49 @@
-# AppleClone
+# iPhone Apple Website
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.3.
+<p align="center">
+  <a>
+    <img src="https://skillicons.dev/icons?i=angular,tailwind,threejs,apple" />
+  </a>
+</p>
 
-## Development server
+## Table of Contents
 
-To start a local development server, run:
+- [About](#about)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Disclaimer](#disclaimer)
 
-```bash
-ng serve
-```
+---
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## About
 
-## Code scaffolding
+This is my implementation from [Apple Website](https://www.youtube.com/watch?v=kRQbRAJ4-Fs). Originally created using React.
+This implementation uses [GSAP](https://gsap.com) library, [Angular Three](https://angularthree.org) and [Angular](https://angular.dev).
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+---
 
-```bash
-ng generate component component-name
-```
+## Installation
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+1. You can clone this repository
 
 ```bash
-ng build
+git clone https://github.com/SergioCzPz/apple.git
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+2. Install all dependencies
 
 ```bash
-ng test
+npm install
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+3. Start dev mode
 
 ```bash
-ng e2e
+ng serve -o
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+---
 
-## Additional Resources
+## Disclaimer
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+The design of this project belongs to [JavaScript Mastery](https://www.youtube.com/@javascriptmastery) and is not for commercial purposes.
