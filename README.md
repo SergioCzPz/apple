@@ -18,7 +18,8 @@
 ## About
 
 This is my implementation from [Apple Website](https://www.youtube.com/watch?v=kRQbRAJ4-Fs). Originally created using React.
-This implementation uses [GSAP](https://gsap.com) library, [Angular Three](https://angularthree.org) and [Angular](https://angular.dev).
+This implementation uses [GSAP](https://gsap.com) library, [Angular Three](https://angularthree.org) and [Angular](https://angular.dev).  
+Visit [This Apple Website](https://ngiphone.netlify.app)
 
 ---
 
